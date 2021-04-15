@@ -95,30 +95,9 @@ function get(serviceNowTable, callback) {
   });
 
 }
-// Use JSDoc to create a JSDoc data type for an IAP callback.
-// Call the new type iapCallback.
-// Notice iapCallback is a data-first callback.
-
-/**
- * This is a [JSDoc comment]{@link http://usejsdoc.org/tags-description.html}.
- * See http://usejsdoc.org/tags-description.html.
- *
- * @callback iapCallback
- * @description A [callback function]{@link
- *   https://developer.mozilla.org/en-US/docs/Glossary/Callback_function}
- *   is a function passed into another function as an argument, which is
- *   then invoked inside the outer function to complete some kind of
- *   routine or action.
- *
- * @param {*} responseData - When no errors are caught, return data as a
- *   single argument to callback function.
- * @param {error} [errorMessage] - If an error is caught, return error
- *   message in optional second argument to callback function.
- */
-
 /**
  * @function post
- * @description Call the ServiceNow GET API.
+ * @description Call the ServiceNow POST API.
  *
  * @param {string} serviceNowTable - The table target of the ServiceNow table API.
  * @param {iapCallback} callback - Callback a function.
