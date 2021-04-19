@@ -93,13 +93,34 @@ class ServiceNowAdapter extends EventEmitter {
  * @param {ServiceNowAdapter~requestCallback} [callback] - The optional callback
  *   that handles the response.
  */
-
- /** For this lab, complete the if else conditional
+healthcheck(callback) {
+ this.getRecord((result, error) => {
+   /**
+    * For this lab, complete the if else conditional
     * statements that check if an error exists
     * or the instance was hibernating. You must write
     * the blocks for each branch.
-    
-     
+    */
+   if (error) {
+            console.error('Error present.');
+            callback.error = error;
+            this.emitOffline();
+            log.error(this.id + " is down.");
+        } else if (!validResponseRegex.test(result.statusCode)) {
+            console.error('Bad response code.');
+            callback.data = result.responseData;       
+        } else if (this.isHibernating(result)) {
+            callback.error = 'Service Now instance is hibernating';
+            console.error(callback.error);
+        } else {
+            callback.data = response;
+            this.emitOnline();
+            log.debug(this.id + " is fine");
+            }
+        return callback(callback.data, callback.error);
+
+
+     /**
       * Write this block.
       * If an error was returned, we need to emit OFFLINE.
       * Log the returned error using IAP's global log object
@@ -110,9 +131,9 @@ class ServiceNowAdapter extends EventEmitter {
       * If an optional IAP callback function was passed to
       * healthcheck(), execute it passing the error seen as an argument
       * for the callback's errorMessage parameter.
-      
+      */
 
-     
+     /**
       * Write this block.
       * If no runtime problems were detected, emit ONLINE.
       * Log an appropriate message using IAP's global log object
@@ -120,54 +141,10 @@ class ServiceNowAdapter extends EventEmitter {
       * If an optional IAP callback function was passed to
       * healthcheck(), execute it passing this function's result
       * parameter as an argument for the callback function's
-      * responseData parameter.*/
-
-/*healthcheck(callback) {
-    // We will build this method in a later lab. For now, it will emulate
-    // a healthy integration by emmitting ONLINE.
-    this.emitOnline();
-  }*/
-
-healthcheck(callback) { 
-    this.getRecord((result, error) => {
-
-   if (error) {
-            console.error("Error present.");
-           // callback.errorMessage = error;
-            this.emitOffline();
-            log.error(this.id + " is down.");
-            if (callback)
-            {
-                callback(null, result);
-            }
-        /*} else if (!validResponseRegex.test(result.statusCode)) {
-            console.error("Bad response code.");
-            this.emitOffline();
-            callback.responseData = result.responseData;
-            if (callback)
-            {
-                callback(null, result);
-            }       
-        } else if (this.isHibernating(result)) {
-            callback.errorMessage = "Service Now instance is hibernating";
-            this.emitOffline();
-            console.error(callback.error);
-            if (callback)
-            {
-                callback(null, result);
-            }*/
-        } else {
-            //callback.responseData = response;
-            this.emitOnline();
-            log.debug(this.id + " is fine");
-            if (callback)
-            {
-                callback(result, null);
-            }  
-            }
-        //return callback(callback.responseData, callback.errorMessage);
-  }
- );
+      * responseData parameter.
+      */
+ 
+ });
 }
 
   /**
@@ -224,37 +201,7 @@ healthcheck(callback) {
      * get() takes a callback function.
      */
 
-
-        this.connector.get((data,error) => {
-         let returnedData = null;
-         let returnedError = null;
-         if (error) {
-             returnedError = error;
-             log.error("GET request returned error: " + returnedError)
-         } else {
-             returnedData = data;
-             log.trace("GET Request returned " + JSON.stringify(returnedData));
-             if (returnedData.body) {
-                 let bodyAsObject = JSON.parse(returnedData.body);
-                 let resultArr = bodyAsObject.result;
-                 let modifiedArr = [];
-                 for (let i = 0; i < resultArr.length; i++) {
-                     modifiedArr.push({
-                         change_ticket_number: resultArr[i].number,
-                         active: resultArr[i].active,
-                         priority: resultArr[i].priority,
-                         description: resultArr[i].description,
-                         work_start: resultArr[i].work_start,
-                         work_end: resultArr[i].work_end,
-                         change_ticket_key: resultArr[i].sys_id
-                     });
-                 }
-                 returnedData = modifiedArr;
-             }
-         }
-         return callback(returnedData, returnedError);
-     });
-
+     this.get(callback);
   }
 
   /**
@@ -274,38 +221,8 @@ healthcheck(callback) {
      * post() takes a callback function.
      */
 
-     //this.post(callback);
-     
-
-        this.connector.post((data,error) => {
-         let returnedData = null;
-         let returnedError = null;
-         if (error) {
-             returnedError = error;
-             log.error("POST request returned error: " + returnedError)
-         } else {
-             returnedData = data;
-             log.trace("POST Request returned " + JSON.stringify(returnedData));
-             if (returnedData.body) {
-                 let bodyAsObject = JSON.parse(returnedData.body);
-                 let resultObject = bodyAsObject.result;
-                 let modifiedObject = {
-                         change_ticket_number: resultObject.number,
-                         active: resultObject.active,
-                         priority: resultObject.priority,
-                         description: resultObject.description,
-                         work_start: resultObject.work_start,
-                         work_end: resultObject.work_end,
-                         change_ticket_key: resultObject.sys_id
-                     };
-                 
-                 returnedData = modifiedObject;
-             };
-         };
-         return callback(returnedData, returnedError);
-     });
+     this.post(callback);
   }
-
 }
 
 module.exports = ServiceNowAdapter;
