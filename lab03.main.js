@@ -1,8 +1,8 @@
 // Update this constant with your ServiceNow credentials
 const options = {
-  url: 'https://dev60737.service-now.com/',
+  url: 'https://dev65577.service-now.com/',
   username: 'admin',
-  password: 'nB7yYWZFrv5s'
+  password: 'OjJubOy28hSF'
 };
 
 
@@ -89,25 +89,23 @@ function processRequestResults(error, response, body, callback) {
    * This function must not check for a hibernating instance;
    * it must call function isHibernating.
    */
-   let callbackData = null;
-   let callbackError = null;
+   //let callbackData = null;
+  // let callbackError = null;
   
-   if (error) {
+  if (error) {
         console.error('Error present.');
-        callbackError = error;
-      }
-else if (!validResponseRegex.test(response.statusCode)) {
+        callback.error = error;
+    } else if (!validResponseRegex.test(response.statusCode)) {
         console.error('Bad response code.');
-        callbackError = response;
-      } else {
-        respone=isHibernating(response);
-        callbackData = response;
-     
-      }
-        
-    
-          
-      return callback(callbackData, callbackError)
+        callback.data = response;       
+    } else if (isHibernating(response)) {
+        callback.error = 'Service Now instance is hibernating';
+        console.error(callback.error);
+    } else {
+        callback.data = response;
+        }
+    return callback(callback.data, callback.error);
+
 }
 
 
