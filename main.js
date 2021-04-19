@@ -83,7 +83,7 @@ class ServiceNowAdapter extends EventEmitter {
     this.healthcheck();
   }
 
-  /**
+/**
  * @memberof ServiceNowAdapter
  * @method healthcheck
  * @summary Check ServiceNow Health
@@ -95,15 +95,31 @@ class ServiceNowAdapter extends EventEmitter {
  */
 healthcheck(callback) {
  this.getRecord((result, error) => {
-   
    /**
     * For this lab, complete the if else conditional
     * statements that check if an error exists
     * or the instance was hibernating. You must write
     * the blocks for each branch.
     */
-    
    if (error) {
+            console.error('Error present.');
+            callback.error = error;
+            this.emitOffline();
+            log.error(this.id + " is down.");
+        } else if (!validResponseRegex.test(result.statusCode)) {
+            console.error('Bad response code.');
+            callback.data = result.responseData;       
+        } else if (this.isHibernating(result)) {
+            callback.error = 'Service Now instance is hibernating';
+            console.error(callback.error);
+        } else {
+            callback.data = response;
+            this.emitOnline();
+            log.debug(this.id + " is fine");
+            }
+        return callback(callback.data, callback.error);
+
+
      /**
       * Write this block.
       * If an error was returned, we need to emit OFFLINE.
@@ -116,26 +132,18 @@ healthcheck(callback) {
       * healthcheck(), execute it passing the error seen as an argument
       * for the callback's errorMessage parameter.
       */
-      
-            console.error('Error present.');
-            callback.error = error;
-            this.emitOffline();
-            log.error(this.id + " is down.");
-   } 
-   else if (this.isHibernating(result)) {
-            callback.error = 'Service Now instance is hibernating';
-            console.error(callback.error);
-    }
-    else if (!validResponseRegex.test(result.statusCode)) {
-            console.error('Bad response code.');
-            callback.data = result.responseData;       
-    }
-   else {
-            callback.data = response;
-            this.emitOnline();
-            log.debug(this.id + " is working");
-            }
-        return callback(callback.data, callback.error);
+
+     /**
+      * Write this block.
+      * If no runtime problems were detected, emit ONLINE.
+      * Log an appropriate message using IAP's global log object
+      * at a debug severity.
+      * If an optional IAP callback function was passed to
+      * healthcheck(), execute it passing this function's result
+      * parameter as an argument for the callback function's
+      * responseData parameter.
+      */
+ 
  });
 }
 
@@ -192,6 +200,7 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * get() takes a callback function.
      */
+
      this.get(callback);
   }
 
@@ -211,6 +220,7 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * post() takes a callback function.
      */
+
      this.post(callback);
   }
 }
